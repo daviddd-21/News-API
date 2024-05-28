@@ -54,3 +54,39 @@ describe("/api", () => {
       });
   });
 });
+
+describe.only("/api/articles/:article_id", () => {
+  test("GET:200, responds with correct article corresponding with the article_id provided in the endpoint", () => {
+    return request(app)
+      .get("/api/articles/2")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: 2,
+          body: expect.any(String),
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+        });
+      });
+  });
+  test("responds with a 404 and an appriopriate message when given a non-existent article_id", () => {
+    return request(app)
+      .get("/api/articles/99999")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("responds with a 404 and an appriopriate message when given an invalid article_id", () => {
+    return request(app)
+      .get("/api/articles/ten")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
