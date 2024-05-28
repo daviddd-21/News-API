@@ -55,7 +55,7 @@ describe("/api", () => {
   });
 });
 
-describe.only("/api/articles/:article_id", () => {
+describe("/api/articles/:article_id", () => {
   test("GET:200, responds with correct article corresponding with the article_id provided in the endpoint", () => {
     return request(app)
       .get("/api/articles/2")
@@ -87,6 +87,41 @@ describe.only("/api/articles/:article_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe.only("/api/articles", () => {
+  test("GET:200", () => {
+    return request(app).get("/api/articles").expect(200);
+  });
+  test("responds with an array containing article objects containing all article properties except the body and also include a comment_count property", () => {
+    return request(app)
+      .get("/api/articles")
+      .then(({ body }) => {
+        body.articles.forEach((article) => {
+          expect(article.body).toBe(undefined);
+          expect(article).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(String),
+          });
+        });
+      });
+  });
+  test("should be sorted by date in date in desceding order", () => {
+    return request(app)
+      .get("/api/articles")
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("created_at", {
+          descending: true,
+          coerce: true,
+        });
       });
   });
 });

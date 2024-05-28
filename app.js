@@ -3,6 +3,7 @@ const {
   getTopics,
   getAPI,
   getArticleById,
+  getArticles,
 } = require("./controllers/controllers");
 const app = express();
 app.use(express.json());
@@ -12,6 +13,8 @@ app.get("/api/topics", getTopics);
 app.get("/api", getAPI);
 
 app.get("/api/articles/:article_id", getArticleById);
+
+app.get("/api/articles", getArticles);
 
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
