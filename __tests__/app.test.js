@@ -172,3 +172,79 @@ describe("/api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("/api/articles/:article_id/comments", () => {
+  test("POST:201, responds with the posted comment", () => {
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send({
+        username: "rogersop",
+        body: "This was a great read, good article",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.postedComment).toMatchObject({
+          comment_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: expect.any(String),
+          body: "This was a great read, good article",
+          article_id: 2,
+        });
+      });
+  });
+  test("responds with a 400 status code with an appriopriate message when given a non-existent username", () => {
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send({
+        username: "daviddd_21",
+        body: "This was a great read, good article",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Username or article does not exist");
+      });
+  });
+  test("responds with a 400 status code with an appriopriate message when given a non-existent article_id", () => {
+    return request(app)
+      .post("/api/articles/99999/comments")
+      .send({
+        username: "rogersop",
+        body: "This was a great read, good article",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Username or article does not exist");
+      });
+  });
+  test("responds with a 400 status code with an appriopriate message when given an invalid article_id", () => {
+    return request(app)
+      .post("/api/articles/twelve/comments")
+      .send({
+        username: "rogersop",
+        body: "This was a great read, good article",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+/*
+Should:
+
+be available on /api/articles/:article_id/comments.
+add a comment for an article.
+Request body accepts:
+
+an object with the following properties:
+username
+body
+Responds with:
+
+the posted comment.
+Consider what errors could occur with this endpoint, and make sure to test for them.
+
+Remember to add a description of this endpoint to your /api endpoint.
+*/
