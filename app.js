@@ -6,6 +6,7 @@ const {
   getArticles,
   getCommentsByArticleId,
   postCommentByArticleId,
+  patchArticleById,
 } = require("./controllers/controllers");
 const app = express();
 app.use(express.json());
@@ -15,6 +16,7 @@ app.get("/api/topics", getTopics);
 app.get("/api", getAPI);
 
 app.get("/api/articles/:article_id", getArticleById);
+app.patch("/api/articles/:article_id", patchArticleById);
 
 app.get("/api/articles", getArticles);
 
@@ -32,6 +34,10 @@ app.use((err, req, res, next) => {
   if (err.code) {
     if (err.code === "23503") {
       res.status(400).send({ msg: "Username or article does not exist" });
+      next(err);
+    }
+    if (err.code === "23502") {
+      res.status(400).send({ msg: "Missing some required information" });
       next(err);
     }
     res.status(400).send({ msg: "Bad request" });
