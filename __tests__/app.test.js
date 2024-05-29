@@ -229,22 +229,79 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Bad request");
       });
   });
+  test("responds with a 400 status code with an appriopriate message when missing a required information in the body", () => {
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send({
+        username: "rogersop",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Missing some required information");
+      });
+  });
 });
 
-/*
-Should:
-
-be available on /api/articles/:article_id/comments.
-add a comment for an article.
-Request body accepts:
-
-an object with the following properties:
-username
-body
-Responds with:
-
-the posted comment.
-Consider what errors could occur with this endpoint, and make sure to test for them.
-
-Remember to add a description of this endpoint to your /api endpoint.
-*/
+describe("/api/articles/:article_id", () => {
+  test("PATCH:201, responds with the updated article", () => {
+    let originalVotes;
+    return request(app)
+      .get("/api/articles/2")
+      .then(({ body }) => {
+        originalVotes = body.article.votes;
+      })
+      .then(() => {
+        return request(app)
+          .patch("/api/articles/2")
+          .send({ inc_votes: 1 })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.updatedArticle).toMatchObject({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: 2,
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              votes: originalVotes + 1,
+              article_img_url: expect.any(String),
+            });
+          });
+      });
+  });
+  test("responds with a 404 status code and an appriopriate message when given a non existent article_id", () => {
+    return request(app)
+      .patch("/api/articles/9999")
+      .send({ inc_votes: 4 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when given a invalid article_id", () => {
+    return request(app)
+      .patch("/api/articles/twelve")
+      .send({ inc_votes: 4 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when given a invalid body", () => {
+    return request(app)
+      .patch("/api/articles/2")
+      .send({ inc_votes: "four" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when body is missing a required information in the body", () => {
+    return request(app)
+      .patch("/api/articles/2")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Missing some required information");
+      });
+  });
+});

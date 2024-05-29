@@ -33,7 +33,7 @@ exports.selectArticleById = (article_id) => {
 exports.selectArticles = () => {
   return db
     .query(
-      "SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.article_id) AS INT) AS comment_count from articles JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url ORDER BY articles.created_at DESC"
+      "SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.article_id) AS INT) AS comment_count from articles JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url ORDER BY articles.created_at DESC;"
     )
     .then(({ rows }) => {
       if (rows.length === 0) {
@@ -66,4 +66,18 @@ exports.insertComment = (article_id, username, body) => {
   return db.query(query).then(({ rows }) => {
     return rows[0];
   });
+};
+
+exports.updateArticleById = (article_id, inc_votes) => {
+  return db
+    .query(
+      "UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;",
+      [inc_votes, article_id]
+    )
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({ status: 404, msg: "Not found" });
+      }
+      return rows[0];
+    });
 };
