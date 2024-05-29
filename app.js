@@ -7,6 +7,7 @@ const {
   getCommentsByArticleId,
   postCommentByArticleId,
   patchArticleById,
+  deleteCommentById,
 } = require("./controllers/controllers");
 const app = express();
 app.use(express.json());
@@ -23,6 +24,8 @@ app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postCommentByArticleId);
 
+app.delete("/api/comments/:comment_id", deleteCommentById);
+
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
     res.status(err.status).send({ msg: err.msg });
@@ -33,7 +36,7 @@ app.use((err, req, res, next) => {
 app.use((err, req, res, next) => {
   if (err.code) {
     if (err.code === "23503") {
-      res.status(400).send({ msg: "Username or article does not exist" });
+      res.status(404).send({ msg: "Username or article does not exist" });
       next(err);
     }
     if (err.code === "23502") {
