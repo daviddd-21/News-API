@@ -45,12 +45,13 @@ exports.getArticles = (req, res, next) => {
         res.status(200).send({ articles });
       })
       .catch(next);
+  } else {
+    selectArticles()
+      .then((articles) => {
+        res.status(200).send({ articles });
+      })
+      .catch(next);
   }
-  selectArticles()
-    .then((articles) => {
-      res.status(200).send({ articles });
-    })
-    .catch(next);
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
@@ -92,7 +93,9 @@ exports.deleteCommentById = (req, res, next) => {
 };
 
 exports.getUsers = (req, res, next) => {
-  selectUsers().then((users) => {
-    res.status(200).send({ users });
-  });
+  selectUsers()
+    .then((users) => {
+      res.status(200).send({ users });
+    })
+    .catch(next);
 };
