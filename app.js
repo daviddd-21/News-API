@@ -36,15 +36,15 @@ app.use((err, req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  if (err.code) {
-    if (err.code === "23503") {
-      res.status(404).send({ msg: "Username or article does not exist" });
-    } else if (err.code === "23502") {
-      res.status(400).send({ msg: "Missing some required information" });
-    } else {
-      res.status(400).send({ msg: "Bad request" });
-    }
-  } else next(err);
+  if (err.code === "23503") {
+    res.status(404).send({ msg: "Username or article does not exist" });
+  } else if (err.code === "23502") {
+    res.status(400).send({ msg: "Missing some required information" });
+  } else if (err.code === "22P02") {
+    res.status(400).send({ msg: "Bad request" });
+  } else {
+    next(err);
+  }
 });
 
 app.use((err, req, res, next) => {
