@@ -387,3 +387,42 @@ describe("/api/articles?topic", () => {
       });
   });
 });
+
+describe("/api/articles/:article_id?comment_count", () => {
+  test("GET:200, responds with the specified article with a comment_count included", () => {
+    return request(app)
+      .get("/api/articles/1?comment_count=true")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: 1,
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(Number),
+          body: expect.any(String),
+        });
+      });
+  });
+  test("GET:200, responds with the specified article without a comment_count if omitted in the endpoint", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.comment_count).toBe(undefined);
+        expect(body.article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: 1,
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          body: expect.any(String),
+        });
+      });
+  });
+});

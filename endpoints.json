@@ -28,7 +28,7 @@
   },
   "GET /api/articles/:article_id": {
     "description": "serves an article corresponding with the article_id provided in the endpoint",
-    "queries": [],
+    "queries": ["comment_count"],
     "exampleResponse": {
       "article": {
         "author": "icellusedkars",
