@@ -50,7 +50,7 @@ describe("/api", () => {
         ]);
       })
       .then(([body, expectedEndpoints]) => {
-        expect(body.endpoints).toEqual(expectedEndpoints);
+        expect(body.endpoints).toEqual(JSON.parse(expectedEndpoints));
       });
   });
 });

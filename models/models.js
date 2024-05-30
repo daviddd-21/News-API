@@ -15,7 +15,7 @@ exports.getAPI = () => {
   return fs
     .readFile(`${__dirname}/../endpoints.json`, "utf-8")
     .then((endpoints) => {
-      return endpoints;
+      return JSON.parse(endpoints);
     });
 };
 
