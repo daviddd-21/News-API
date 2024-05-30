@@ -8,6 +8,7 @@ const {
   updateArticleById,
   deleteCommentById,
   selectUsers,
+  selectArticlesByTopic,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -36,6 +37,14 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
+  const { topic } = req.query;
+  if (topic) {
+    selectArticlesByTopic(topic)
+      .then((articles) => {
+        res.status(200).send({ articles });
+      })
+      .catch(next);
+  }
   selectArticles()
     .then((articles) => {
       res.status(200).send({ articles });

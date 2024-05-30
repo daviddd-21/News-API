@@ -99,3 +99,14 @@ exports.selectUsers = () => {
     return rows;
   });
 };
+
+exports.selectArticlesByTopic = (topic) => {
+  return db
+    .query("SELECT * FROM articles WHERE topic = $1", [topic])
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({ status: 404, msg: "Not found" });
+      }
+      return rows;
+    });
+};
