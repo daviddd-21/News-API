@@ -346,7 +346,7 @@ describe("/api/users", () => {
   });
 });
 
-describe.only("/api/articles?topic", () => {
+describe("/api/articles?topic", () => {
   test("GET:200, responds with articles filtered by the topic specified in the endpoint", () => {
     const topic = "mitch";
     return request(app)
