@@ -1,6 +1,5 @@
 const {
   selectTopics,
-  getAPI,
   selectArticleById,
   selectArticles,
   selectCommentsByArticleId,
@@ -20,17 +19,13 @@ exports.getTopics = (req, res, next) => {
 };
 
 exports.getAPI = (req, res, next) => {
-  getAPI()
-    .then((endpoints) => {
-      res.status(200).send({ endpoints });
-    })
-    .catch(next);
+  const endpoints = require("../endpoints.json");
+  res.status(200).send({ endpoints });
 };
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
-  const { comment_count } = req.query;
-  selectArticleById(article_id, comment_count)
+  selectArticleById(article_id)
     .then((article) => {
       res.status(200).send({ article });
     })
