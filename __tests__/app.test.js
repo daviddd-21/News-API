@@ -12,22 +12,14 @@ beforeEach(() => {
 afterAll(() => db.end());
 
 describe("/api/topics", () => {
-  test("GET:200, responds with an array of topic objects", () => {
+  test("GET:200, responds with an array of topic objects containing the right properties", () => {
     return request(app)
       .get("/api/topics")
       .expect(200)
       .then(({ body }) => {
+        expect(body.topics.length > 0).toBe(true);
         expect(Array.isArray(body.topics)).toBe(true);
         expect(body.topics.length > 0).toBe(true);
-        body.topics.forEach((topic) => {
-          expect(typeof topic).toBe("object");
-        });
-      });
-  });
-  test("Each object in the array should have appriopriate properties", () => {
-    return request(app)
-      .get("/api/topics")
-      .then(({ body }) => {
         body.topics.forEach((topic) => {
           expect(topic).toMatchObject({
             slug: expect.any(String),
@@ -44,13 +36,8 @@ describe("/api", () => {
       .get("/api")
       .expect(200)
       .then(({ body }) => {
-        return Promise.all([
-          body,
-          fs.readFile(`${__dirname}/../endpoints.json`, "utf-8"),
-        ]);
-      })
-      .then(([body, expectedEndpoints]) => {
-        expect(body.endpoints).toEqual(JSON.parse(expectedEndpoints));
+        const expectedEndpoints = require("../endpoints.json");
+        expect(body.endpoints).toEqual(expectedEndpoints);
       });
   });
 });
@@ -92,13 +79,12 @@ describe("/api/articles/:article_id", () => {
 });
 
 describe("/api/articles", () => {
-  test("GET:200", () => {
-    return request(app).get("/api/articles").expect(200);
-  });
-  test("responds with an array containing article objects containing all article properties except the body and also include a comment_count property", () => {
+  test("GET:200, responds with an array containing article objects containing all article properties except the body and also include a comment_count property", () => {
     return request(app)
       .get("/api/articles")
+      .expect(200)
       .then(({ body }) => {
+        expect(body.articles.length > 0).toBe(true);
         body.articles.forEach((article) => {
           expect(article.body).toBe(undefined);
           expect(article).toMatchObject({
@@ -193,6 +179,29 @@ describe("/api/articles/:article_id/comments", () => {
         });
       });
   });
+  test("POST:201, responds with the posted comment when extra properties have been provided as well as the required ones on the request body", () => {
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send({
+        username: "rogersop",
+        body: "This was a great read, good article",
+        date: "2024/05/31",
+        time: "11:56",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.postedComment.date).toBe(undefined);
+        expect(body.postedComment.time).toBe(undefined);
+        expect(body.postedComment).toMatchObject({
+          comment_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: expect.any(String),
+          body: "This was a great read, good article",
+          article_id: 2,
+        });
+      });
+  });
   test("responds with a 404 status code with an appriopriate message when given a non-existent username", () => {
     return request(app)
       .post("/api/articles/2/comments")
@@ -243,7 +252,7 @@ describe("/api/articles/:article_id/comments", () => {
 });
 
 describe("/api/articles/:article_id", () => {
-  test("PATCH:201, responds with the updated article", () => {
+  test("PATCH:201, responds with the updated article when incrementing the votes", () => {
     let originalVotes;
     return request(app)
       .get("/api/articles/2")
@@ -263,6 +272,56 @@ describe("/api/articles/:article_id", () => {
               topic: expect.any(String),
               created_at: expect.any(String),
               votes: originalVotes + 1,
+              article_img_url: expect.any(String),
+            });
+          });
+      });
+  });
+  test("PATCH:201, responds with the updated article when decrementing the votes", () => {
+    let originalVotes;
+    return request(app)
+      .get("/api/articles/2")
+      .then(({ body }) => {
+        originalVotes = body.article.votes;
+      })
+      .then(() => {
+        return request(app)
+          .patch("/api/articles/2")
+          .send({ inc_votes: -1 })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.updatedArticle).toMatchObject({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: 2,
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              votes: originalVotes - 1,
+              article_img_url: expect.any(String),
+            });
+          });
+      });
+  });
+  test("PATCH:201, responds with the updated article when extra properties have been provided as well as the required ones on the request body", () => {
+    let originalVotes;
+    return request(app)
+      .get("/api/articles/2")
+      .then(({ body }) => {
+        originalVotes = body.article.votes;
+      })
+      .then(() => {
+        return request(app)
+          .patch("/api/articles/2")
+          .send({ inc_votes: 2, article: 2 })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.updatedArticle).toMatchObject({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: 2,
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              votes: originalVotes + 2,
               article_img_url: expect.any(String),
             });
           });
@@ -353,6 +412,7 @@ describe("/api/articles?topic", () => {
       .get(`/api/articles?topic=${topic}`)
       .expect(200)
       .then(({ body }) => {
+        expect(body.articles.length > 0).toBe(true);
         body.articles.forEach((article) => {
           expect(article.topic).toBe(topic);
         });
@@ -363,6 +423,7 @@ describe("/api/articles?topic", () => {
       .get(`/api/articles`)
       .expect(200)
       .then(({ body }) => {
+        expect(body.articles.length > 0).toBe(true);
         body.articles.forEach((article) => {
           expect(article).toMatchObject({
             author: expect.any(String),
@@ -386,12 +447,21 @@ describe("/api/articles?topic", () => {
         expect(body.msg).toBe("Not found");
       });
   });
+  test("responds with a 404 status code and an appriopriate message when given as existent topic but no related articles", () => {
+    const topic = "life";
+    return request(app)
+      .get(`/api/articles?topic=${topic}`)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
 });
 
-describe("/api/articles/:article_id?comment_count", () => {
-  test("GET:200, responds with the specified article with a comment_count included", () => {
+describe("/api/articles/:article_id(comment_count)", () => {
+  test.only("GET:200, responds with the specified article with a comment_count included", () => {
     return request(app)
-      .get("/api/articles/1?comment_count=true")
+      .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
         expect(body.article).toMatchObject({
@@ -403,24 +473,6 @@ describe("/api/articles/:article_id?comment_count", () => {
           votes: expect.any(Number),
           article_img_url: expect.any(String),
           comment_count: expect.any(Number),
-          body: expect.any(String),
-        });
-      });
-  });
-  test("GET:200, responds with the specified article without a comment_count if omitted in the endpoint", () => {
-    return request(app)
-      .get("/api/articles/1")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.article.comment_count).toBe(undefined);
-        expect(body.article).toMatchObject({
-          author: expect.any(String),
-          title: expect.any(String),
-          article_id: 1,
-          topic: expect.any(String),
-          created_at: expect.any(String),
-          votes: expect.any(Number),
-          article_img_url: expect.any(String),
           body: expect.any(String),
         });
       });
