@@ -25,10 +25,34 @@ exports.selectArticleById = (article_id) => {
     });
 };
 
-exports.selectArticles = () => {
+exports.selectArticles = (queries) => {
+  const { topic, sort_by = "created_at", order = "DESC" } = queries;
+  const queryParams = [];
+  let topicQuery = "";
+  const validSortBy = [
+    "author",
+    "title",
+    "article_id",
+    "topic",
+    "created_at",
+    "votes",
+    "comment_count",
+  ];
+  const validOrder = ["ASC", "DESC"];
+  if (topic) {
+    topicQuery = "WHERE topic = $1";
+    queryParams.push(topic);
+  }
+  if (!validSortBy.includes(sort_by)) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  }
+  if (!validOrder.includes(order)) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  }
   return db
     .query(
-      "SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.article_id) AS INT) AS comment_count from articles JOIN comments ON articles.article_id = comments.article_id GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url ORDER BY articles.created_at DESC;"
+      `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.article_id) AS INT) AS comment_count from articles JOIN comments ON articles.article_id = comments.article_id ${topicQuery} GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url ORDER BY articles.${sort_by} ${order};`,
+      queryParams
     )
     .then(({ rows }) => {
       if (rows.length === 0) {
@@ -93,15 +117,4 @@ exports.selectUsers = () => {
   return db.query("SELECT * FROM users;").then(({ rows }) => {
     return rows;
   });
-};
-
-exports.selectArticlesByTopic = (topic) => {
-  return db
-    .query("SELECT * FROM articles WHERE topic = $1", [topic])
-    .then(({ rows }) => {
-      if (!rows.length) {
-        return Promise.reject({ status: 404, msg: "Not found" });
-      }
-      return rows;
-    });
 };
