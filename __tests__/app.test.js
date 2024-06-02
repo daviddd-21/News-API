@@ -600,3 +600,26 @@ describe("GET /api/articles (sorting queries)", () => {
       });
   });
 });
+
+describe("/api/users/:username", () => {
+  test("GET:200, responds with the user with the username specified in the endpoint", () => {
+    return request(app)
+      .get("/api/users/butter_bridge")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.user).toMatchObject({
+          username: "butter_bridge",
+          name: expect.any(String),
+          avatar_url: expect.any(String),
+        });
+      });
+  });
+  test("responds with 404 status code and an appriopriate message when given a non-existent username", () => {
+    return request(app)
+      .get("/api/users/davidd_21")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+});

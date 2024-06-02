@@ -111,5 +111,15 @@
         }
       ]
     }
+  },
+  "GET /api/users/:username": {
+    "description": "serves a user corresponding with the username given in the endpoint",
+    "exampleResponse": {
+      "user": {
+        "username": "butter_bridge",
+        "name": "john",
+        "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+      }
+    }
   }
 }

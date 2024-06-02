@@ -9,6 +9,7 @@ const {
   patchArticleById,
   deleteCommentById,
   getUsers,
+  getUserByUsername,
 } = require("./controllers/controllers");
 const app = express();
 app.use(express.json());
@@ -28,6 +29,8 @@ app.post("/api/articles/:article_id/comments", postCommentByArticleId);
 app.delete("/api/comments/:comment_id", deleteCommentById);
 
 app.get("/api/users", getUsers);
+
+app.get("/api/users/:username", getUserByUsername);
 
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
