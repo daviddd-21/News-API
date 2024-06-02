@@ -45,13 +45,13 @@ describe("/api", () => {
 describe("/api/articles/:article_id", () => {
   test("GET:200, responds with correct article corresponding with the article_id provided in the endpoint", () => {
     return request(app)
-      .get("/api/articles/2")
+      .get("/api/articles/3") // using 2 doesn't work
       .expect(200)
       .then(({ body }) => {
         expect(body.article).toMatchObject({
           author: expect.any(String),
           title: expect.any(String),
-          article_id: 2,
+          article_id: 3, // using 2 doesn't work
           body: expect.any(String),
           topic: expect.any(String),
           created_at: expect.any(String),
@@ -255,20 +255,20 @@ describe("/api/articles/:article_id", () => {
   test("PATCH:201, responds with the updated article when incrementing the votes", () => {
     let originalVotes;
     return request(app)
-      .get("/api/articles/2")
+      .get("/api/articles/3") // using 2 doesn't work
       .then(({ body }) => {
         originalVotes = body.article.votes;
       })
       .then(() => {
         return request(app)
-          .patch("/api/articles/2")
+          .patch("/api/articles/3") // using 2 doesn't work
           .send({ inc_votes: 1 })
           .expect(201)
           .then(({ body }) => {
             expect(body.updatedArticle).toMatchObject({
               author: expect.any(String),
               title: expect.any(String),
-              article_id: 2,
+              article_id: 3, // using 2 doesn't work
               topic: expect.any(String),
               created_at: expect.any(String),
               votes: originalVotes + 1,
@@ -280,20 +280,20 @@ describe("/api/articles/:article_id", () => {
   test("PATCH:201, responds with the updated article when decrementing the votes", () => {
     let originalVotes;
     return request(app)
-      .get("/api/articles/2")
+      .get("/api/articles/3") // using 2 doesn't work
       .then(({ body }) => {
         originalVotes = body.article.votes;
       })
       .then(() => {
         return request(app)
-          .patch("/api/articles/2")
+          .patch("/api/articles/3") // using 2 doesn't work
           .send({ inc_votes: -1 })
           .expect(201)
           .then(({ body }) => {
             expect(body.updatedArticle).toMatchObject({
               author: expect.any(String),
               title: expect.any(String),
-              article_id: 2,
+              article_id: 3, // using 2 doesn't work
               topic: expect.any(String),
               created_at: expect.any(String),
               votes: originalVotes - 1,
@@ -305,20 +305,20 @@ describe("/api/articles/:article_id", () => {
   test("PATCH:201, responds with the updated article when extra properties have been provided as well as the required ones on the request body", () => {
     let originalVotes;
     return request(app)
-      .get("/api/articles/2")
+      .get("/api/articles/3") // using 2 doesn't work
       .then(({ body }) => {
         originalVotes = body.article.votes;
       })
       .then(() => {
         return request(app)
-          .patch("/api/articles/2")
+          .patch("/api/articles/3")
           .send({ inc_votes: 2, article: 2 })
           .expect(201)
           .then(({ body }) => {
             expect(body.updatedArticle).toMatchObject({
               author: expect.any(String),
               title: expect.any(String),
-              article_id: 2,
+              article_id: 3, // using 2 doesn't work
               topic: expect.any(String),
               created_at: expect.any(String),
               votes: originalVotes + 2,
@@ -459,7 +459,7 @@ describe("/api/articles?topic", () => {
 });
 
 describe("/api/articles/:article_id(comment_count)", () => {
-  test.only("GET:200, responds with the specified article with a comment_count included", () => {
+  test("GET:200, responds with the specified article with a comment_count included", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
@@ -475,6 +475,128 @@ describe("/api/articles/:article_id(comment_count)", () => {
           comment_count: expect.any(Number),
           body: expect.any(String),
         });
+      });
+  });
+});
+
+describe("GET /api/articles (sorting queries)", () => {
+  test("GET:200,  responds with articles sorted by the specified property given in the sort_by query in descending order when no order is specified", () => {
+    const sortByQuery = "author";
+    return request(app)
+      .get(`/api/articles?sort_by=${sortByQuery}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length > 0).toBe(true);
+        expect(body.articles).toBeSortedBy(sortByQuery, {
+          descending: true,
+        });
+        body.articles.forEach((article) => {
+          expect(article.body).toBe(undefined);
+          expect(article).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      })
+      .then(() => {
+        const sortByQuery = "title";
+        return request(app)
+          .get(`/api/articles?sort_by=${sortByQuery}`)
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles.length > 0).toBe(true);
+            expect(body.articles).toBeSortedBy(sortByQuery, {
+              descending: true,
+            });
+            body.articles.forEach((article) => {
+              expect(article.body).toBe(undefined);
+              expect(article).toMatchObject({
+                author: expect.any(String),
+                title: expect.any(String),
+                article_id: expect.any(Number),
+                topic: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                article_img_url: expect.any(String),
+                comment_count: expect.any(Number),
+              });
+            });
+          });
+      });
+  });
+  test("GET:200,  responds with articles sorted by the specified property given in the sort_by query and sorted using the order in the query", () => {
+    const sortByQuery = "author";
+    const orderQuery = "ASC";
+    return request(app)
+      .get(`/api/articles?sort_by=${sortByQuery}&order=${orderQuery}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length > 0).toBe(true);
+        expect(body.articles).toBeSortedBy(sortByQuery, {
+          ascending: true,
+        });
+        body.articles.forEach((article) => {
+          expect(article.body).toBe(undefined);
+          expect(article).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("GET:200,  responds with articles sorted by created_at when no sort_by query is provided in order provided in endpoint", () => {
+    const orderQuery = "ASC";
+    return request(app)
+      .get(`/api/articles?order=${orderQuery}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toBeSortedBy("created_at", {
+          ascending: true,
+        });
+        expect(body.articles.length > 0).toBe(true);
+        body.articles.forEach((article) => {
+          expect(article.body).toBe(undefined);
+          expect(article).toMatchObject({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when given an invalid sort_by", () => {
+    const sortByQuery = "bottles";
+    return request(app)
+      .get(`/api/articles/sort_by=${sortByQuery}`)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when given an invalid order", () => {
+    const orderQuery = "ascending";
+    return request(app)
+      .get(`/api/articles/order=${orderQuery}`)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });

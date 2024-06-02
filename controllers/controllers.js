@@ -33,20 +33,12 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  const { topic } = req.query;
-  if (topic) {
-    selectArticlesByTopic(topic)
-      .then((articles) => {
-        res.status(200).send({ articles });
-      })
-      .catch(next);
-  } else {
-    selectArticles()
-      .then((articles) => {
-        res.status(200).send({ articles });
-      })
-      .catch(next);
-  }
+  const queries = req.query;
+  selectArticles(queries)
+    .then((articles) => {
+      res.status(200).send({ articles });
+    })
+    .catch(next);
 };
 
 exports.getCommentsByArticleId = (req, res, next) => {
