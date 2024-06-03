@@ -10,6 +10,8 @@ const {
   deleteCommentById,
   getUsers,
   getUserByUsername,
+  getCommentById,
+  patchCommentById,
 } = require("./controllers/controllers");
 const app = express();
 app.use(express.json());
@@ -27,6 +29,8 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postCommentByArticleId);
 
 app.delete("/api/comments/:comment_id", deleteCommentById);
+app.get("/api/comments/:comment_id", getCommentById);
+app.patch("/api/comments/:comment_id", patchCommentById);
 
 app.get("/api/users", getUsers);
 

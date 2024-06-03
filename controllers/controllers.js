@@ -8,6 +8,8 @@ const {
   deleteCommentById,
   selectUsers,
   selectUserByUsername,
+  selectCommentById,
+  updateCommentById,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -92,6 +94,25 @@ exports.getUserByUsername = (req, res, next) => {
   selectUserByUsername(username)
     .then((user) => {
       res.status(200).send({ user });
+    })
+    .catch(next);
+};
+
+exports.getCommentById = (req, res, next) => {
+  const { comment_id } = req.params;
+  selectCommentById(comment_id)
+    .then((comment) => {
+      res.status(200).send({ comment });
+    })
+    .catch(next);
+};
+
+exports.patchCommentById = (req, res, next) => {
+  const { comment_id } = req.params;
+  const { inc_votes } = req.body;
+  updateCommentById(comment_id, inc_votes)
+    .then((updatedComment) => {
+      res.status(201).send({ updatedComment });
     })
     .catch(next);
 };
