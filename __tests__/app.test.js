@@ -623,3 +623,135 @@ describe("/api/users/:username", () => {
       });
   });
 });
+
+describe("/api/comments/:comment", () => {
+  // add error handling and in endpoints.json
+  test("GET: 200, responds with the corresponding comment stated in the comment", () => {
+    return request(app)
+      .get("/api/comments/2")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          comment_id: 2,
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: expect.any(String),
+          body: expect.any(String),
+          article_id: expect.any(Number),
+        });
+      });
+  });
+});
+
+describe.only("/api/comments/:comment_id", () => {
+  test("PATCH:201, responds with the updated comment when incrementing votes of a comment", () => {
+    let originalVotes;
+    return request(app)
+      .get("/api/comments/2")
+      .then(({ body }) => {
+        originalVotes = body.comment.votes;
+      })
+      .then(() => {
+        return request(app)
+          .patch("/api/comments/2")
+          .send({ inc_votes: 2 })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.updatedComment).toMatchObject({
+              comment_id: 2,
+              votes: originalVotes + 2,
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              article_id: expect.any(Number),
+            });
+          });
+      });
+  });
+  test("PATCH:201, responds with the updated comment when decrementing votes of a comment", () => {
+    let originalVotes;
+    return request(app)
+      .get("/api/comments/2")
+      .expect(200)
+      .then(({ body }) => {
+        originalVotes = body.comment.votes;
+      })
+      .then(() => {
+        return request(app)
+          .patch("/api/comments/2")
+          .send({ inc_votes: -2 })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.updatedComment).toMatchObject({
+              comment_id: 2,
+              votes: originalVotes - 2,
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              article_id: expect.any(Number),
+            });
+          });
+      });
+  });
+  test("PATCH:201, responds with the updated comment when extra properties have been provided as well as the required ones", () => {
+    let originalVotes;
+    return request(app)
+      .get("/api/comments/2")
+      .expect(200)
+      .then(({ body }) => {
+        originalVotes = body.comment.votes;
+      })
+      .then(() => {
+        return request(app)
+          .patch("/api/comments/2")
+          .send({ inc_votes: -2, bottles: 2 })
+          .expect(201)
+          .then(({ body }) => {
+            expect(body.updatedComment).toMatchObject({
+              comment_id: 2,
+              votes: originalVotes - 2,
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              article_id: expect.any(Number),
+            });
+          });
+      });
+  });
+  test("responds with a 404 status code and an appriopriate message when given a non existent article_id", () => {
+    return request(app)
+      .patch("/api/comments/9999")
+      .send({ inc_votes: 4 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when given a invalid comment_id", () => {
+    return request(app)
+      .patch("/api/comments/twelve")
+      .send({ inc_votes: 4 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when given a invalid body", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ inc_votes: "four" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when body is missing a required information in the body", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Missing some required information");
+      });
+  });
+});
