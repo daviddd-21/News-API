@@ -45,13 +45,13 @@ describe("/api", () => {
 describe("/api/articles/:article_id", () => {
   test("GET:200, responds with correct article corresponding with the article_id provided in the endpoint", () => {
     return request(app)
-      .get("/api/articles/3") // using 2 doesn't work
+      .get("/api/articles/2") // using 2 doesn't work
       .expect(200)
       .then(({ body }) => {
         expect(body.article).toMatchObject({
           author: expect.any(String),
           title: expect.any(String),
-          article_id: 3, // using 2 doesn't work
+          article_id: 2, // using 2 doesn't work
           body: expect.any(String),
           topic: expect.any(String),
           created_at: expect.any(String),
@@ -255,20 +255,20 @@ describe("/api/articles/:article_id", () => {
   test("PATCH:201, responds with the updated article when incrementing the votes", () => {
     let originalVotes;
     return request(app)
-      .get("/api/articles/3") // using 2 doesn't work
+      .get("/api/articles/2") // using 2 doesn't work
       .then(({ body }) => {
         originalVotes = body.article.votes;
       })
       .then(() => {
         return request(app)
-          .patch("/api/articles/3") // using 2 doesn't work
+          .patch("/api/articles/2") // using 2 doesn't work
           .send({ inc_votes: 1 })
           .expect(201)
           .then(({ body }) => {
             expect(body.updatedArticle).toMatchObject({
               author: expect.any(String),
               title: expect.any(String),
-              article_id: 3, // using 2 doesn't work
+              article_id: 2, // using 2 doesn't work
               topic: expect.any(String),
               created_at: expect.any(String),
               votes: originalVotes + 1,
@@ -643,7 +643,7 @@ describe("/api/comments/:comment", () => {
   });
 });
 
-describe.only("/api/comments/:comment_id", () => {
+describe("/api/comments/:comment_id", () => {
   test("PATCH:201, responds with the updated comment when incrementing votes of a comment", () => {
     let originalVotes;
     return request(app)
@@ -755,3 +755,56 @@ describe.only("/api/comments/:comment_id", () => {
       });
   });
 });
+
+// describe.only("/api/articles", () => {
+//   test("POST:201, responds with the newly posted article", () => {
+//     return request(app)
+//       .post("/api/articles")
+//       .send({
+//         author: "Fabrizio Romano",
+//         title: "Kylian Mbappe",
+//         body: "Mpabbe to Real Madrid, Here We Go",
+//         topic: "life",
+//         article_img_url: "image url",
+//       })
+//       .expect(201)
+//       .then(({ body }) => {
+//         expect(body.postedArticle).toMatchObject({
+//           author: "Fabrizio Romano",
+//           title: "Kylian Mbappe",
+//           article_id: expect.any(Number),
+//           topic: "life",
+//           body: "Mpabbe to Real Madrid, Here We Go",
+//           created_at: expect.any(String),
+//           votes: expect.any(Number),
+//           article_img_url: expect.any(String),
+//           comment_count: expect.any(Number),
+//         });
+//       });
+//   });
+// });
+
+/*
+Should:
+
+be available on /api/articles.
+add a new article.
+Request body accepts:
+
+an object with the following properties:
+author
+title
+body
+topic
+article_img_url - will default if not provided
+Responds with:
+
+the newly added article, with all the above properties, as well as:
+article_id
+votes
+created_at
+comment_count
+Consider what errors could occur with this endpoint, and make sure to test for them.
+
+Remember to add a description of this endpoint to your /api endpoint.
+*/

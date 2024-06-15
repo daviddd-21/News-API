@@ -14,7 +14,7 @@ exports.selectTopics = () => {
 exports.selectArticleById = (article_id) => {
   return db
     .query(
-      "SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body, CAST(COUNT(comments.article_id) AS INT) AS comment_count FROM articles JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body;",
+      "SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body, CAST(COUNT(comments.article_id) AS INT) AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id",
       [article_id]
     )
     .then(({ rows }) => {
@@ -153,3 +153,28 @@ exports.updateCommentById = (comment_id, inc_votes) => {
       return rows[0];
     });
 };
+
+exports.insertArticle = (article) => {
+  const {
+    author,
+    title,
+    body,
+    topic,
+    article_img_url = "anything for now",
+  } = article;
+  db.query(
+    "INSERT INTO articles(title, topic, author, body, article_img_url) VALUES($1, $2, $3, $4, $5);",
+    [title, topic, author, body, article_img_url]
+  ).then(() => {
+    return db
+      .query(
+        "SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body, CAST(COUNT(comments.article_id) AS INT) AS comment_count FROM articles JOIN comments ON articles.article_id = comments.article_id WHERE articles.title = $1 GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body;",
+        [title]
+      )
+      .then(({ rows }) => {
+        return rows[0];
+      });
+  });
+};
+
+//author references usernames froms users table

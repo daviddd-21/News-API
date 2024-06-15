@@ -10,6 +10,7 @@ const {
   selectUserByUsername,
   selectCommentById,
   updateCommentById,
+  insertArticle,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -113,6 +114,15 @@ exports.patchCommentById = (req, res, next) => {
   updateCommentById(comment_id, inc_votes)
     .then((updatedComment) => {
       res.status(201).send({ updatedComment });
+    })
+    .catch(next);
+};
+
+exports.postArticle = (req, res, next) => {
+  const article = req.body;
+  insertArticle(article)
+    .then((postedArticle) => {
+      res.status(201).send({ postedArticle });
     })
     .catch(next);
 };
