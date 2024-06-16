@@ -827,7 +827,7 @@ describe("/api/articles", () => {
         expect(body.msg).toBe("Missing some required information");
       });
   });
-  test.only("POST:201, responds with the newly posted article with a default image if an article_img_url isn't provided", () => {
+  test("POST:201, responds with the newly posted article with a default image if an article_img_url isn't provided", () => {
     return request(app)
       .post("/api/articles")
       .send({
