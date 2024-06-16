@@ -14,7 +14,7 @@ exports.selectTopics = () => {
 exports.selectArticleById = (article_id) => {
   return db
     .query(
-      "SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body, CAST(COUNT(comments.article_id) AS INT) AS comment_count FROM articles JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body;",
+      "SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, articles.body, CAST(COUNT(comments.article_id) AS INT) AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id",
       [article_id]
     )
     .then(({ rows }) => {
@@ -51,7 +51,7 @@ exports.selectArticles = (queries) => {
   }
   return db
     .query(
-      `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.article_id) AS INT) AS comment_count from articles JOIN comments ON articles.article_id = comments.article_id ${topicQuery} GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url ORDER BY articles.${sort_by} ${order};`,
+      `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.article_id) AS INT) AS comment_count from articles LEFT JOIN comments ON articles.article_id = comments.article_id ${topicQuery} GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url ORDER BY articles.${sort_by} ${order};`,
       queryParams
     )
     .then(({ rows }) => {
@@ -153,3 +153,25 @@ exports.updateCommentById = (comment_id, inc_votes) => {
       return rows[0];
     });
 };
+
+exports.insertArticle = (article) => {
+  const {
+    author,
+    title,
+    body,
+    topic,
+    article_img_url = "anything for now",
+  } = article;
+  return db
+    .query(
+      "INSERT INTO articles(title, topic, author, body, article_img_url) VALUES($1, $2, $3, $4, $5) RETURNING article_id, author, title, topic, created_at, votes, article_img_url, body",
+      [title, topic, author, body, article_img_url]
+    )
+    .then(({ rows }) => {
+      const insertedRow = rows[0];
+      insertedRow.comment_count = 0;
+      return insertedRow;
+    });
+};
+
+//author references usernames froms users table

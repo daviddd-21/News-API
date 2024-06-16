@@ -76,7 +76,7 @@
     }
   },
   "PATCH /api/articles/:article_id": {
-    "description": "updates the votes by the given number in the body of the article specified in the endpoint the serves the updated article",
+    "description": "updates the votes by the given number in the body of the article specified in the endpoint then serves the updated article",
     "exampleBody": {
       "inc_votes": 2
     },
@@ -123,7 +123,7 @@
     }
   },
   "PATCH /api/comments/:comment_id": {
-    "description": "updates the votes by the given number in the body of the article specified in the endpoint the serves the updated article",
+    "description": "updates the votes by the given number in the body of the comment specified in the endpoint then serves the updated comment",
     "exampleBody": {
       "inc_votes": 2
     },
