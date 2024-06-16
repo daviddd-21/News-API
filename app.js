@@ -13,11 +13,13 @@ const {
   getCommentById,
   patchCommentById,
   postArticle,
+  postTopic,
 } = require("./controllers/controllers");
 const app = express();
 app.use(express.json());
 
 app.get("/api/topics", getTopics);
+app.post("/api/topics", postTopic);
 
 app.get("/api", getAPI);
 
@@ -46,8 +48,7 @@ app.use((err, req, res, next) => {
 
 app.use((err, req, res, next) => {
   if (err.code === "23503") {
-    //be more specific
-    console.log(err);
+    //be more specific by logging the err, then responding with the appriopriate msg
     res.status(404).send({ msg: "Username or article does not exist" });
   } else if (err.code === "23502") {
     res.status(400).send({ msg: "Missing some required information" });

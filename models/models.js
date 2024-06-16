@@ -174,4 +174,15 @@ exports.insertArticle = (article) => {
     });
 };
 
-//author references usernames froms users table
+exports.insertTopic = (topic) => {
+  const { slug, description } = topic;
+  return db
+    .query("INSERT INTO topics(slug, description) VALUES($1, $2) RETURNING *", [
+      slug,
+      description,
+    ])
+    .then(({ rows }) => {
+      console.log(rows[0]);
+      return rows[0];
+    });
+};
