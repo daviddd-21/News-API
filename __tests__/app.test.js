@@ -756,55 +756,100 @@ describe("/api/comments/:comment_id", () => {
   });
 });
 
-// describe.only("/api/articles", () => {
-//   test("POST:201, responds with the newly posted article", () => {
-//     return request(app)
-//       .post("/api/articles")
-//       .send({
-//         author: "Fabrizio Romano",
-//         title: "Kylian Mbappe",
-//         body: "Mpabbe to Real Madrid, Here We Go",
-//         topic: "life",
-//         article_img_url: "image url",
-//       })
-//       .expect(201)
-//       .then(({ body }) => {
-//         expect(body.postedArticle).toMatchObject({
-//           author: "Fabrizio Romano",
-//           title: "Kylian Mbappe",
-//           article_id: expect.any(Number),
-//           topic: "life",
-//           body: "Mpabbe to Real Madrid, Here We Go",
-//           created_at: expect.any(String),
-//           votes: expect.any(Number),
-//           article_img_url: expect.any(String),
-//           comment_count: expect.any(Number),
-//         });
-//       });
-//   });
-// });
-
-/*
-Should:
-
-be available on /api/articles.
-add a new article.
-Request body accepts:
-
-an object with the following properties:
-author
-title
-body
-topic
-article_img_url - will default if not provided
-Responds with:
-
-the newly added article, with all the above properties, as well as:
-article_id
-votes
-created_at
-comment_count
-Consider what errors could occur with this endpoint, and make sure to test for them.
-
-Remember to add a description of this endpoint to your /api endpoint.
-*/
+describe("/api/articles", () => {
+  //add to endpoint.json
+  test("POST:201, responds with the newly posted article", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "rogersop",
+        title: "Kylian Mbappe",
+        body: "Mpabbe to Real Madrid, Here We Go",
+        topic: "life",
+        article_img_url: "image url",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.postedArticle).toMatchObject({
+          author: "rogersop",
+          title: "Kylian Mbappe",
+          article_id: expect.any(Number),
+          topic: "life",
+          body: "Mpabbe to Real Madrid, Here We Go",
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: "image url",
+          comment_count: 0,
+        });
+      });
+  });
+  test("responds with a 404 status code an appriopriate message when given a non-exitent author", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "Fabrizio Romano",
+        title: "Kylian Mbappe",
+        body: "Mpabbe to Real Madrid, Here We Go",
+        topic: "life",
+        article_img_url: "image url",
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Username or article does not exist"); //change later
+      });
+  });
+  test("responds with a 404 status code an appriopriate message when given a non-exitent topic", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "rogersop",
+        title: "Kylian Mbappe",
+        body: "Mpabbe to Real Madrid, Here We Go",
+        topic: "household",
+        article_img_url: "image url",
+      })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Username or article does not exist"); // change later
+      });
+  });
+  test("responds with a 400 status code an appriopriate message when missing a required information", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "rogersop",
+        title: "Kylian Mbappe",
+        topic: "household",
+        article_img_url: "image url",
+      })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Missing some required information");
+      });
+  });
+  test.only("POST:201, responds with the newly posted article with a default image if an article_img_url isn't provided", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        author: "rogersop",
+        title: "Kylian Mbappe",
+        body: "Mpabbe to Real Madrid, Here We Go",
+        topic: "life",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.postedArticle).toMatchObject({
+          author: "rogersop",
+          title: "Kylian Mbappe",
+          article_id: expect.any(Number),
+          topic: "life",
+          body: "Mpabbe to Real Madrid, Here We Go",
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: "anything for now",
+          comment_count: 0,
+        });
+      });
+  });
+});
+// add to enpoint api
