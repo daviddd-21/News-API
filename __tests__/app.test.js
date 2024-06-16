@@ -853,3 +853,66 @@ describe("/api/articles", () => {
   });
 });
 // add to enpoint api
+
+describe("POST /api/topics", () => {
+  //add to endpoint.json
+  test("POST: 201, responds with the posted topic", () => {
+    return request(app)
+      .post("/api/topics")
+      .send({
+        slug: "football",
+        description: "Football is life",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.postedTopic).toMatchObject({
+          slug: "football",
+          description: "Football is life",
+        });
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when missing a required information", () => {
+    return request(app)
+      .post("/api/topics")
+      .send({ description: "Football is life" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Missing some required information");
+      });
+  });
+  test("POST: 201, responds with the posted topic and description as null when a description isn't provided", () => {
+    return request(app)
+      .post("/api/topics")
+      .send({
+        slug: "football",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.postedTopic).toMatchObject({
+          slug: "football",
+          description: null,
+        });
+      });
+  });
+});
+//add endpoint to endpoint.json
+
+/*
+Should:
+
+be available on /api/topics.
+add new topic.
+Request body accepts:
+
+an object in the form:
+{
+  "slug": "topic name here",
+  "description": "description here"
+}
+Responds with:
+
+a topic object containing the newly added topic.
+Consider what errors could occur with this endpoint, and make sure to test for them.
+
+Remember to add a description of this endpoint to your /api endpoint.
+*/
