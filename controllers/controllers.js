@@ -12,6 +12,7 @@ const {
   updateCommentById,
   insertArticle,
   insertTopic,
+  deleteArticleById,
 } = require("../models/models");
 
 exports.getTopics = (req, res, next) => {
@@ -133,6 +134,15 @@ exports.postTopic = (req, res, next) => {
   insertTopic(topic)
     .then((postedTopic) => {
       res.status(201).send({ postedTopic });
+    })
+    .catch(next);
+};
+
+exports.deleteArticleById = (req, res, next) => {
+  const { article_id } = req.params;
+  deleteArticleById(article_id)
+    .then(() => {
+      res.status(204).end();
     })
     .catch(next);
 };
