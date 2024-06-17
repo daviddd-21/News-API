@@ -897,22 +897,26 @@ describe("POST /api/topics", () => {
 });
 //add endpoint to endpoint.json
 
-/*
-Should:
-
-be available on /api/topics.
-add new topic.
-Request body accepts:
-
-an object in the form:
-{
-  "slug": "topic name here",
-  "description": "description here"
-}
-Responds with:
-
-a topic object containing the newly added topic.
-Consider what errors could occur with this endpoint, and make sure to test for them.
-
-Remember to add a description of this endpoint to your /api endpoint.
-*/
+describe("/api/articles/:article_id", () => {
+  //add to endpoint.json
+  test("DELETE: 204", () => {
+    return request(app).delete("/api/articles/2").expect(204);
+  });
+  test("responds with a 404 status code and an appriopriate message when given a non exixtent or an invalid article_id", () => {
+    return request(app)
+      .delete("/api/articles/9999")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("responds with a 400 status code and an appriopriate message when given an invalid article_id", () => {
+    return request(app)
+      .delete("/api/articles/twelve")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+//add endpoint to endpoint.json

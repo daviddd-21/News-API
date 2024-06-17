@@ -182,7 +182,19 @@ exports.insertTopic = (topic) => {
       description,
     ])
     .then(({ rows }) => {
-      console.log(rows[0]);
+      return rows[0];
+    });
+};
+
+exports.deleteArticleById = (article_id) => {
+  return db
+    .query("DELETE FROM articles WHERE article_id = $1 RETURNING *", [
+      article_id,
+    ])
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({ status: 404, msg: "Not found" });
+      }
       return rows[0];
     });
 };
