@@ -17,7 +17,9 @@ const {
   deleteArticleById,
 } = require("./controllers/controllers");
 const app = express();
+const cors = require("cors");
 app.use(express.json());
+app.use(cors());
 
 app.get("/api/topics", getTopics);
 app.post("/api/topics", postTopic);
