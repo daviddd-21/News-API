@@ -49,9 +49,10 @@ exports.selectArticles = (queries) => {
   if (!validOrder.includes(order)) {
     return Promise.reject({ status: 400, msg: "Bad request" });
   }
+
   return db
     .query(
-      `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.article_id) AS INT) AS comment_count from articles LEFT JOIN comments ON articles.article_id = comments.article_id ${topicQuery} GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url ORDER BY articles.${sort_by} ${order};`,
+      `SELECT articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url, CAST(COUNT(comments.article_id) AS INT) AS comment_count from articles LEFT JOIN comments ON articles.article_id = comments.article_id ${topicQuery} GROUP BY articles.author, title, articles.article_id, topic, articles.created_at, articles.votes, article_img_url ORDER BY ${sort_by} ${order};`,
       queryParams
     )
     .then(({ rows }) => {
