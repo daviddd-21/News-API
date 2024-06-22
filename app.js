@@ -15,6 +15,7 @@ const {
   postArticle,
   postTopic,
   deleteArticleById,
+  postUser,
 } = require("./controllers/controllers");
 const app = express();
 const cors = require("cors");
@@ -41,6 +42,7 @@ app.get("/api/comments/:comment_id", getCommentById);
 app.patch("/api/comments/:comment_id", patchCommentById);
 
 app.get("/api/users", getUsers);
+app.post("/api/users", postUser);
 
 app.get("/api/users/:username", getUserByUsername);
 

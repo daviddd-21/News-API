@@ -199,3 +199,15 @@ exports.deleteArticleById = (article_id) => {
       return rows[0];
     });
 };
+
+exports.insertUser = (user) => {
+  const { username, name, avatar_url, password } = user;
+  return db
+    .query(
+      "INSERT INTO users(username, name, avatar_url, password) VALUES ($1, $2, $3, $4) RETURNING *",
+      [username, name, avatar_url, password]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};

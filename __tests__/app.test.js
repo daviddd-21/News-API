@@ -920,3 +920,24 @@ describe("/api/articles/:article_id", () => {
   });
 });
 //add endpoint to endpoint.json
+
+describe("/api/users", () => {
+  test("POST:201, responds with posted user", () => {
+    return request(app)
+      .post("/api/users")
+      .send({
+        username: "daviddd_21",
+        name: "David",
+        avatar_url: "This for now",
+        password: "Password1",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.postedUser).toMatchObject({
+          username: "daviddd_21",
+          name: "David",
+          avatar_url: "This for now",
+        });
+      });
+  });
+});
