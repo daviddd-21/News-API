@@ -1,5 +1,6 @@
 node_modules
 .env.*
 hostingAPIonline.md
+error-handling.md
 checking.sql
 checking.txt
